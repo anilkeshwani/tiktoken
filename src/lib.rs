@@ -238,14 +238,20 @@ impl CoreBPE {
             }
             let end = next_special.map_or(text.len(), |m| m.start());
 
+            dbg!(&regex); // Debugging: check if the regex matches what we specify in Python
+
             // Okay, here we go, compare this logic to _encode_ordinary_native
             for mat in regex.find_iter(&text[start..end]) {
-                let piece = mat.unwrap().as_str().as_bytes();
+                let _piece = mat.unwrap().as_str();
+                println!("piece: {:?}", _piece);
+                let piece = _piece.as_bytes();
                 if let Some(token) = self.encoder.get(piece) {
                     last_piece_token_len = 1;
                     ret.push(*token);
+                    println!("Continuing. Found token: {} for piece: {}", token, _piece);
                     continue;
                 }
+                println!("Using BPE. Token not found for piece: {}", _piece);
                 let tokens = byte_pair_encode(piece, &self.encoder);
                 last_piece_token_len = tokens.len();
                 ret.extend(&tokens);
